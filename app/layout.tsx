@@ -1,6 +1,7 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
 import SecretAccessProvider from '@/components/SecretAccessProvider'
+import { DarkModeProvider } from '@/components/DarkModeProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,9 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <SecretAccessProvider>
-          {children}
-        </SecretAccessProvider>
+        <DarkModeProvider>
+          <SecretAccessProvider>
+            {children}
+          </SecretAccessProvider>
+        </DarkModeProvider>
       </body>
     </html>
   )

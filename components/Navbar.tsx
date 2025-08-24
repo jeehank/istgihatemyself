@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X, User, LogIn, Home, Newspaper, Users } from 'lucide-react'
+import DarkModeToggle from './DarkModeToggle'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -42,7 +43,7 @@ export default function Navbar() {
         transition={{ duration: 0.6 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled || needsSolidBackground
-            ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200'
+            ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg border-b border-gray-200 dark:border-gray-700'
             : 'bg-transparent'
         }`}
       >
@@ -59,12 +60,12 @@ export default function Navbar() {
               </div>
               <div>
                 <h1 className={`font-inter text-xl font-bold transition-colors duration-300 ${
-                  scrolled || needsSolidBackground ? 'text-gray-900' : 'text-white'
+                  scrolled || needsSolidBackground ? 'text-gray-900 dark:text-white' : 'text-white'
                 }`}>
                   X-CLUBS
                 </h1>
                 <p className={`font-calibri text-xs transition-colors duration-300 ${
-                  scrolled || needsSolidBackground ? 'text-gray-600' : 'text-white/80'
+                  scrolled || needsSolidBackground ? 'text-gray-600 dark:text-gray-400' : 'text-white/80'
                 }`}>
                   St.Xavier's Collegiate School
                 </p>
@@ -82,10 +83,10 @@ export default function Navbar() {
                     className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-calibri transition-all duration-300 ${
                       isActive(link.href)
                         ? scrolled || needsSolidBackground
-                          ? 'bg-blue-100 text-blue-600'
+                          ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
                           : 'bg-white/20 text-white'
                         : scrolled || needsSolidBackground
-                          ? 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
+                          ? 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400'
                           : 'text-white/80 hover:bg-white/10 hover:text-white'
                     }`}
                   >
@@ -96,11 +97,29 @@ export default function Navbar() {
               })}
             </div>
 
-            {/* Admin Login Button */}
-            <div className="hidden md:flex items-center space-x-4">
+            {/* Dark Mode Toggle & Login Buttons */}
+            <div className="hidden md:flex items-center space-x-3">
+              <DarkModeToggle
+                className={`${
+                  scrolled || needsSolidBackground
+                    ? 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    : 'text-white hover:bg-white/10'
+                }`}
+              />
+              <Link
+                href="/member/login"
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-calibri font-semibold transition-all duration-300 transform hover:scale-105 ${
+                  scrolled || needsSolidBackground
+                    ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg'
+                    : 'bg-white/20 backdrop-blur-md hover:bg-white/30 text-white border border-white/30'
+                }`}
+              >
+                <User className="w-4 h-4" />
+                <span>Member Login</span>
+              </Link>
               <Link
                 href="/admin/login"
-                className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-calibri font-semibold transition-all duration-300 transform hover:scale-105 ${
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-calibri font-semibold transition-all duration-300 transform hover:scale-105 ${
                   scrolled || needsSolidBackground
                     ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
                     : 'bg-white/20 backdrop-blur-md hover:bg-white/30 text-white border border-white/30'
@@ -115,7 +134,7 @@ export default function Navbar() {
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={`md:hidden p-2 rounded-lg transition-colors duration-300 ${
-                scrolled || needsSolidBackground ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'
+                scrolled || needsSolidBackground ? 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800' : 'text-white hover:bg-white/10'
               }`}
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -132,7 +151,7 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed top-16 md:top-20 left-0 right-0 z-40 md:hidden bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200"
+            className="fixed top-16 md:top-20 left-0 right-0 z-40 md:hidden bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg border-b border-gray-200 dark:border-gray-700"
           >
             <div className="container mx-auto px-8 py-6">
               <div className="space-y-4">
@@ -145,8 +164,8 @@ export default function Navbar() {
                       onClick={() => setIsOpen(false)}
                       className={`flex items-center space-x-3 w-full px-4 py-3 rounded-xl font-calibri transition-all duration-300 ${
                         isActive(link.href)
-                          ? 'bg-blue-100 text-blue-600'
-                          : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
+                          ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400'
                       }`}
                     >
                       <Icon className="w-5 h-5" />
@@ -155,7 +174,20 @@ export default function Navbar() {
                   )
                 })}
                 
-                {/* Mobile Admin Login */}
+                {/* Dark Mode Toggle */}
+                <div className="flex justify-center py-2">
+                  <DarkModeToggle className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800" />
+                </div>
+
+                {/* Mobile Login Buttons */}
+                <Link
+                  href="/member/login"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center space-x-3 w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-calibri font-semibold transition-all duration-300"
+                >
+                  <User className="w-5 h-5" />
+                  <span>Member Login</span>
+                </Link>
                 <Link
                   href="/admin/login"
                   onClick={() => setIsOpen(false)}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Heart, Calendar, User, MessageCircle, Filter, Search, ArrowLeft } from 'lucide-react'
+import { Heart, Calendar, User, MessageCircle, Filter, Search, ArrowLeft, Clock, Tag, TrendingUp } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { clubs } from '@/data/clubs'
 import Link from 'next/link'
@@ -17,6 +17,7 @@ interface NewsItem {
   likes: number
   created_at: string
   club_id: string
+  type?: 'featured' | 'regular' | 'announcement'
 }
 
 export default function NewsPage() {
@@ -24,6 +25,8 @@ export default function NewsPage() {
   const [filteredNews, setFilteredNews] = useState<NewsItem[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedClub, setSelectedClub] = useState<string>('all')
+  const [selectedType, setSelectedType] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<string>('date')
   const [searchTerm, setSearchTerm] = useState('')
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set())
 
@@ -32,8 +35,8 @@ export default function NewsPage() {
   }, [])
 
   useEffect(() => {
-    filterNews()
-  }, [news, selectedClub, searchTerm])
+    filterAndSortNews()
+  }, [news, selectedClub, selectedType, sortBy, searchTerm])
 
   const fetchAllNews = async () => {
     try {
@@ -44,27 +47,34 @@ export default function NewsPage() {
 
       if (error) {
         console.error('Error fetching news:', error)
-        // For demo purposes, use mock data if Supabase is not connected
+        // Use mock data if database is not available
         setNews(generateMockNewsForAllClubs())
       } else {
         setNews(data || [])
       }
     } catch (error) {
-      console.error('Error:', error)
-      // Use mock data if there's an error
+      console.error('Database connection error:', error)
+      // Fallback to mock data for development
       setNews(generateMockNewsForAllClubs())
     } finally {
       setLoading(false)
     }
   }
 
-  const filterNews = () => {
+  const filterAndSortNews = () => {
     let filtered = news
 
+    // Filter by club
     if (selectedClub !== 'all') {
       filtered = filtered.filter(item => item.club_id === selectedClub)
     }
 
+    // Filter by type
+    if (selectedType !== 'all') {
+      filtered = filtered.filter(item => (item.type || 'regular') === selectedType)
+    }
+
+    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(item =>
         item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -72,6 +82,22 @@ export default function NewsPage() {
         item.author.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
+
+    // Sort news
+    filtered = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'date':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        case 'likes':
+          return b.likes - a.likes
+        case 'club':
+          const clubA = getClubName(a.club_id)
+          const clubB = getClubName(b.club_id)
+          return clubA.localeCompare(clubB)
+        default:
+          return 0
+      }
+    })
 
     setFilteredNews(filtered)
   }
@@ -98,7 +124,6 @@ export default function NewsPage() {
       }
     } catch (error) {
       console.error('Error liking post:', error)
-      // Optimistic update for demo
       setNews(prevNews =>
         prevNews.map(item =>
           item.id === newsId ? { ...item, likes: item.likes + 1 } : item
@@ -118,6 +143,28 @@ export default function NewsPage() {
     return club ? club.color : 'bg-gray-600'
   }
 
+  const getTypeIcon = (type?: string) => {
+    switch (type) {
+      case 'featured':
+        return <TrendingUp className="w-4 h-4" />
+      case 'announcement':
+        return <MessageCircle className="w-4 h-4" />
+      default:
+        return <Calendar className="w-4 h-4" />
+    }
+  }
+
+  const getTypeColor = (type?: string) => {
+    switch (type) {
+      case 'featured':
+        return 'bg-red-100 text-red-700 border-red-200'
+      case 'announcement':
+        return 'bg-blue-100 text-blue-700 border-blue-200'
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-200'
+    }
+  }
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', {
@@ -127,48 +174,61 @@ export default function NewsPage() {
     })
   }
 
+  const featuredNews = filteredNews.filter(item => item.type === 'featured')
+  const regularNews = filteredNews.filter(item => item.type !== 'featured')
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-900 via-purple-900 to-pink-900 text-white py-20">
+      
+      {/* Newspaper Header */}
+      <section className="bg-white border-b-4 border-gray-900 py-8">
         <div className="container mx-auto px-8">
-          {/* Back Button */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-8"
-          >
-            <Link
-              href="/"
-              className="inline-flex items-center text-white/80 hover:text-white transition-colors duration-300"
-            >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              <span className="font-calibri">Back to Home</span>
-            </Link>
-          </motion.div>
-
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <h1 className="font-inter text-5xl md:text-7xl font-bold mb-6">
-              Club News
+            <div className="flex items-center justify-center mb-4">
+              <Link
+                href="/"
+                className="flex items-center text-gray-600 hover:text-gray-900 transition-colors duration-300 mr-8"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                <span className="font-calibri">Back to Home</span>
+              </Link>
+              <div className="h-px bg-gray-300 flex-1"></div>
+              <div className="px-4">
+                <Clock className="w-5 h-5 text-gray-600" />
+              </div>
+              <div className="h-px bg-gray-300 flex-1"></div>
+            </div>
+            
+            <h1 className="font-serif text-6xl md:text-8xl font-bold text-gray-900 mb-2">
+              THE X-CLUBS
             </h1>
-            <p className="font-calibri text-xl md:text-2xl text-white/90 max-w-3xl mx-auto">
-              Stay updated with the latest happenings, events, and achievements from all our amazing clubs
-            </p>
+            <div className="flex items-center justify-center space-x-4 text-sm text-gray-600">
+              <span>ST.XAVIER'S COLLEGIATE SCHOOL</span>
+              <span>•</span>
+              <span>{new Date().toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}</span>
+            </div>
+            <div className="mt-4 text-lg font-bold text-gray-800">
+              "All the news that's fit to print from our clubs"
+            </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Filters Section */}
-      <section className="py-12 bg-white border-b">
+      {/* Filter Controls */}
+      <section className="py-6 bg-white border-b">
         <div className="container mx-auto px-8">
-          <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             {/* Search */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
@@ -179,49 +239,82 @@ export default function NewsPage() {
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search news..."
+                placeholder="Search articles..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent font-calibri"
+                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-none font-serif focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               />
             </motion.div>
 
-            {/* Club Filter */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="relative"
-            >
-              <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <select
-                value={selectedClub}
-                onChange={(e) => setSelectedClub(e.target.value)}
-                className="pl-12 pr-8 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent font-calibri bg-white min-w-48"
+            {/* Filters */}
+            <div className="flex gap-4">
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
               >
-                <option value="all">All Clubs</option>
-                {clubs.map((club) => (
-                  <option key={club.id} value={club.id}>
-                    {club.name}
-                  </option>
-                ))}
-              </select>
-            </motion.div>
+                <select
+                  value={selectedClub}
+                  onChange={(e) => setSelectedClub(e.target.value)}
+                  className="px-4 py-3 border border-gray-300 rounded-none font-serif bg-white focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                >
+                  <option value="all">All Clubs</option>
+                  {clubs.map((club) => (
+                    <option key={club.id} value={club.id}>
+                      {club.name}
+                    </option>
+                  ))}
+                </select>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+              >
+                <select
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                  className="px-4 py-3 border border-gray-300 rounded-none font-serif bg-white focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                >
+                  <option value="all">All Types</option>
+                  <option value="featured">Featured</option>
+                  <option value="regular">Regular</option>
+                  <option value="announcement">Announcements</option>
+                </select>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="px-4 py-3 border border-gray-300 rounded-none font-serif bg-white focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                >
+                  <option value="date">Sort by Date</option>
+                  <option value="likes">Sort by Likes</option>
+                  <option value="club">Sort by Club</option>
+                </select>
+              </motion.div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* News Section */}
-      <section className="py-16">
+      {/* News Content */}
+      <section className="py-8">
         <div className="container mx-auto px-8">
           {loading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="bg-white rounded-3xl shadow-xl p-8 animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-                  <div className="h-20 bg-gray-200 rounded mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                <div key={i} className="bg-white border border-gray-300 p-6 animate-pulse">
+                  <div className="h-4 bg-gray-200 w-3/4 mb-4"></div>
+                  <div className="h-4 bg-gray-200 w-1/2 mb-4"></div>
+                  <div className="h-20 bg-gray-200 mb-4"></div>
+                  <div className="h-4 bg-gray-200 w-1/3"></div>
                 </div>
               ))}
             </div>
@@ -232,71 +325,161 @@ export default function NewsPage() {
               transition={{ duration: 0.8 }}
               className="text-center py-20"
             >
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-20 h-20 bg-gray-100 border border-gray-300 flex items-center justify-center mx-auto mb-6">
                 <MessageCircle className="w-10 h-10 text-gray-400" />
               </div>
-              <h3 className="font-inter text-2xl font-bold text-gray-900 mb-4">
-                No News Found
+              <h3 className="font-serif text-2xl font-bold text-gray-900 mb-4">
+                No Articles Found
               </h3>
-              <p className="font-calibri text-gray-600 max-w-md mx-auto">
-                {searchTerm || selectedClub !== 'all'
+              <p className="font-serif text-gray-600 max-w-md mx-auto">
+                {searchTerm || selectedClub !== 'all' || selectedType !== 'all'
                   ? 'Try adjusting your search or filter criteria.'
-                  : 'No news articles have been published yet. Check back later!'}
+                  : 'No articles have been published yet. Check back later!'}
               </p>
             </motion.div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredNews.map((item, index) => (
-                <motion.article
-                  key={item.id}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="bg-white rounded-3xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
-                >
-                  {/* Club Badge */}
-                  <div className={`inline-flex items-center px-4 py-2 rounded-full ${getClubColor(item.club_id)} text-white text-sm font-inter font-semibold mb-4`}>
-                    {getClubName(item.club_id)}
-                  </div>
-
-                  {/* Content */}
-                  <h3 className="font-inter text-xl font-bold text-gray-900 mb-3 line-clamp-2">
-                    {item.title}
-                  </h3>
-                  <p className="font-calibri text-gray-700 leading-relaxed mb-6 line-clamp-3">
-                    {item.content}
-                  </p>
-
-                  {/* Author & Date */}
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                      <User className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-inter font-semibold text-gray-900 text-sm">{item.author}</p>
-                      <div className="flex items-center text-xs text-gray-500">
-                        <Calendar className="w-3 h-3 mr-1" />
-                        {formatDate(item.created_at)}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Like Button */}
-                  <button
-                    onClick={() => handleLike(item.id)}
-                    disabled={likedPosts.has(item.id)}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 ${
-                      likedPosts.has(item.id)
-                        ? 'bg-red-100 text-red-600 cursor-not-allowed'
-                        : 'bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600'
-                    }`}
+            <div className="space-y-12">
+              {/* Featured News Section */}
+              {featuredNews.length > 0 && (
+                <div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="border-b-2 border-gray-900 pb-2 mb-8"
                   >
-                    <Heart className={`w-4 h-4 ${likedPosts.has(item.id) ? 'fill-current' : ''}`} />
-                    <span className="font-calibri text-sm">{item.likes}</span>
-                  </button>
-                </motion.article>
-              ))}
+                    <h2 className="font-serif text-3xl font-bold text-gray-900">FEATURED STORIES</h2>
+                  </motion.div>
+                  
+                  <div className="grid md:grid-cols-2 gap-8 mb-12">
+                    {featuredNews.slice(0, 2).map((item, index) => (
+                      <motion.article
+                        key={item.id}
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: index * 0.1 }}
+                        className="bg-white border-2 border-gray-900 p-8 hover:shadow-lg transition-all duration-300"
+                      >
+                        {/* Article Header */}
+                        <div className="flex items-center justify-between mb-4">
+                          <div className={`inline-flex items-center space-x-2 px-3 py-1 text-xs font-bold border ${getTypeColor(item.type)}`}>
+                            {getTypeIcon(item.type)}
+                            <span>{item.type?.toUpperCase() || 'REGULAR'}</span>
+                          </div>
+                          <div className={`px-3 py-1 text-xs font-bold text-white ${getClubColor(item.club_id)}`}>
+                            {getClubName(item.club_id)}
+                          </div>
+                        </div>
+
+                        {/* Content */}
+                        <h3 className="font-serif text-2xl font-bold text-gray-900 mb-4 leading-tight">
+                          {item.title}
+                        </h3>
+                        <p className="font-serif text-gray-700 leading-relaxed mb-6 text-lg">
+                          {item.content}
+                        </p>
+
+                        {/* Author & Date */}
+                        <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+                          <div className="flex items-center space-x-2">
+                            <User className="w-4 h-4" />
+                            <span className="font-bold">By {item.author}</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Calendar className="w-4 h-4" />
+                            <span>{formatDate(item.created_at)}</span>
+                          </div>
+                        </div>
+
+                        {/* Like Button */}
+                        <button
+                          onClick={() => handleLike(item.id)}
+                          disabled={likedPosts.has(item.id)}
+                          className={`flex items-center space-x-2 px-4 py-2 border transition-all duration-300 ${
+                            likedPosts.has(item.id)
+                              ? 'border-red-600 bg-red-50 text-red-600 cursor-not-allowed'
+                              : 'border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white'
+                          }`}
+                        >
+                          <Heart className={`w-4 h-4 ${likedPosts.has(item.id) ? 'fill-current' : ''}`} />
+                          <span className="font-serif font-bold">{item.likes}</span>
+                        </button>
+                      </motion.article>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Regular News Section */}
+              {regularNews.length > 0 && (
+                <div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="border-b-2 border-gray-900 pb-2 mb-8"
+                  >
+                    <h2 className="font-serif text-2xl font-bold text-gray-900">LATEST NEWS</h2>
+                  </motion.div>
+                  
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {regularNews.map((item, index) => (
+                      <motion.article
+                        key={item.id}
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: index * 0.05 }}
+                        className="bg-white border border-gray-300 p-6 hover:shadow-md transition-all duration-300"
+                      >
+                        {/* Article Header */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className={`inline-flex items-center space-x-1 px-2 py-1 text-xs font-bold border ${getTypeColor(item.type)}`}>
+                            {getTypeIcon(item.type)}
+                            <span>{item.type?.toUpperCase() || 'REGULAR'}</span>
+                          </div>
+                          <div className={`px-2 py-1 text-xs font-bold text-white ${getClubColor(item.club_id)}`}>
+                            {getClubName(item.club_id)}
+                          </div>
+                        </div>
+
+                        {/* Content */}
+                        <h3 className="font-serif text-lg font-bold text-gray-900 mb-3 leading-tight line-clamp-2">
+                          {item.title}
+                        </h3>
+                        <p className="font-serif text-gray-700 leading-relaxed mb-4 text-sm line-clamp-3">
+                          {item.content}
+                        </p>
+
+                        {/* Author & Date */}
+                        <div className="flex items-center justify-between text-xs text-gray-600 mb-3">
+                          <div className="flex items-center space-x-1">
+                            <User className="w-3 h-3" />
+                            <span className="font-bold">{item.author}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Calendar className="w-3 h-3" />
+                            <span>{formatDate(item.created_at)}</span>
+                          </div>
+                        </div>
+
+                        {/* Like Button */}
+                        <button
+                          onClick={() => handleLike(item.id)}
+                          disabled={likedPosts.has(item.id)}
+                          className={`flex items-center space-x-2 px-3 py-1 border text-xs transition-all duration-300 ${
+                            likedPosts.has(item.id)
+                              ? 'border-red-600 bg-red-50 text-red-600 cursor-not-allowed'
+                              : 'border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white'
+                          }`}
+                        >
+                          <Heart className={`w-3 h-3 ${likedPosts.has(item.id) ? 'fill-current' : ''}`} />
+                          <span className="font-serif font-bold">{item.likes}</span>
+                        </button>
+                      </motion.article>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -307,35 +490,46 @@ export default function NewsPage() {
   )
 }
 
-// Mock data generator for demo purposes
+// Enhanced mock data generator with different news types
 function generateMockNewsForAllClubs(): NewsItem[] {
   const mockNews: NewsItem[] = []
   
   clubs.forEach((club, clubIndex) => {
     const newsItems = [
       {
-        id: `${club.id}-news-1`,
-        title: `${club.name} Announces New Initiatives`,
-        content: `We're excited to share our new initiatives for this semester. ${club.name} is planning several workshops and events to enhance member experience.`,
+        id: `${club.id}-featured-1`,
+        title: `${club.name} Wins Major Inter-School Competition`,
+        content: `In a spectacular display of talent and dedication, ${club.name} has emerged victorious in the prestigious inter-school competition held last weekend. Our team showcased exceptional skills and teamwork, bringing glory to St.Xavier's Collegiate School. This victory is a testament to the hard work and commitment of our members.`,
         author: 'Club President',
-        likes: (parseInt(club.id) * 3) + 5,
+        likes: (parseInt(club.id) * 5) + 15,
         created_at: new Date(Date.now() - (clubIndex + 1) * 24 * 60 * 60 * 1000).toISOString(),
-        club_id: club.id
+        club_id: club.id,
+        type: clubIndex === 0 || clubIndex === 2 ? 'featured' : 'regular'
       },
       {
         id: `${club.id}-news-2`,
-        title: 'Recent Competition Success',
-        content: `Congratulations to our ${club.name} members who excelled in the recent inter-school competition. Your dedication and hard work paid off!`,
+        title: `Upcoming Workshop Series by ${club.name}`,
+        content: `${club.name} is excited to announce a series of workshops designed to enhance skills and knowledge in our field. These sessions will be conducted by industry experts and will provide hands-on experience to all participants.`,
         author: 'Event Coordinator',
         likes: (parseInt(club.id) * 2) + 3,
         created_at: new Date(Date.now() - (clubIndex + 3) * 24 * 60 * 60 * 1000).toISOString(),
-        club_id: club.id
+        club_id: club.id,
+        type: 'regular'
+      },
+      {
+        id: `${club.id}-announcement-1`,
+        title: `Important Notice: ${club.name} Meeting Schedule`,
+        content: `Please note that our regular meeting schedule has been updated. All members are requested to check the new timings and mark their calendars accordingly. Attendance is mandatory for all active members.`,
+        author: 'Secretary',
+        likes: (parseInt(club.id)) + 1,
+        created_at: new Date(Date.now() - (clubIndex + 5) * 24 * 60 * 60 * 1000).toISOString(),
+        club_id: club.id,
+        type: 'announcement'
       }
     ]
     
     mockNews.push(...newsItems)
   })
 
-  // Sort by date (newest first)
   return mockNews.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 }

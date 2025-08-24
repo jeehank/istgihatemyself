@@ -48,6 +48,7 @@ export type Database = {
           content: string
           author: string
           likes: number
+          type: 'featured' | 'regular' | 'announcement'
           created_at: string
           updated_at: string
         }
@@ -58,6 +59,7 @@ export type Database = {
           content: string
           author: string
           likes?: number
+          type?: 'featured' | 'regular' | 'announcement'
           created_at?: string
           updated_at?: string
         }
@@ -68,6 +70,7 @@ export type Database = {
           content?: string
           author?: string
           likes?: number
+          type?: 'featured' | 'regular' | 'announcement'
           created_at?: string
           updated_at?: string
         }
@@ -89,6 +92,181 @@ export type Database = {
           id?: string
           club_name?: string
           password_hash?: string
+          created_at?: string
+        }
+      }
+      club_registrations: {
+        Row: {
+          id: string
+          name: string
+          email: string
+          class: string
+          section: string
+          roll_no: string
+          phone: string | null
+          club_id: string
+          club_name: string
+          status: 'pending' | 'approved' | 'rejected'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          email: string
+          class: string
+          section: string
+          roll_no: string
+          phone?: string | null
+          club_id: string
+          club_name: string
+          status?: 'pending' | 'approved' | 'rejected'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          email?: string
+          class?: string
+          section?: string
+          roll_no?: string
+          phone?: string | null
+          club_id?: string
+          club_name?: string
+          status?: 'pending' | 'approved' | 'rejected'
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      members: {
+        Row: {
+          id: string
+          name: string
+          class: string
+          section: string
+          roll_no: string
+          password_hash: string
+          email: string | null
+          phone: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          class: string
+          section: string
+          roll_no: string
+          password_hash: string
+          email?: string | null
+          phone?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          class?: string
+          section?: string
+          roll_no?: string
+          password_hash?: string
+          email?: string | null
+          phone?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      club_memberships: {
+        Row: {
+          id: string
+          member_id: string
+          club_id: string
+          club_name: string
+          status: 'active' | 'inactive' | 'banned'
+          joined_at: string
+        }
+        Insert: {
+          id?: string
+          member_id: string
+          club_id: string
+          club_name: string
+          status?: 'active' | 'inactive' | 'banned'
+          joined_at?: string
+        }
+        Update: {
+          id?: string
+          member_id?: string
+          club_id?: string
+          club_name?: string
+          status?: 'active' | 'inactive' | 'banned'
+          joined_at?: string
+        }
+      }
+      club_groups: {
+        Row: {
+          id: string
+          club_id: string
+          club_name: string
+          description: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          club_id: string
+          club_name: string
+          description?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          club_id?: string
+          club_name?: string
+          description?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      group_messages: {
+        Row: {
+          id: string
+          group_id: string
+          sender_id: string | null
+          sender_name: string
+          sender_type: 'member' | 'admin' | 'system'
+          message_text: string
+          message_type: 'text' | 'news_update' | 'announcement' | 'system'
+          metadata: any
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          group_id: string
+          sender_id?: string | null
+          sender_name: string
+          sender_type?: 'member' | 'admin' | 'system'
+          message_text: string
+          message_type?: 'text' | 'news_update' | 'announcement' | 'system'
+          metadata?: any
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          group_id?: string
+          sender_id?: string | null
+          sender_name?: string
+          sender_type?: 'member' | 'admin' | 'system'
+          message_text?: string
+          message_type?: 'text' | 'news_update' | 'announcement' | 'system'
+          metadata?: any
           created_at?: string
         }
       }

@@ -98,14 +98,14 @@ export default function ClubNews({ clubId, clubName }: ClubNewsProps) {
   if (loading) {
     return (
       <div className="p-8">
-        <h2 className="font-inter text-3xl font-bold text-gray-900 mb-6">
+        <h2 className="font-inter text-3xl font-bold text-gray-900 dark:text-white mb-6">
           Latest News
         </h2>
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
             </div>
           ))}
         </div>
@@ -119,20 +119,20 @@ export default function ClubNews({ clubId, clubName }: ClubNewsProps) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.8, delay: 0.4 }}
-      className="bg-white rounded-3xl shadow-xl p-8"
+      className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8"
     >
-      <h2 className="font-inter text-3xl font-bold text-gray-900 mb-6 flex items-center">
+      <h2 className="font-inter text-3xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
         <MessageCircle className="w-8 h-8 mr-3 text-green-500" />
         Latest News
       </h2>
 
       {news.length === 0 ? (
         <div className="text-center py-12">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
             <MessageCircle className="w-8 h-8 text-gray-400" />
           </div>
-          <p className="font-calibri text-gray-500">No news available yet.</p>
-          <p className="font-calibri text-sm text-gray-400 mt-2">
+          <p className="font-calibri text-gray-500 dark:text-gray-400">No news available yet.</p>
+          <p className="font-calibri text-sm text-gray-400 dark:text-gray-500 mt-2">
             Check back later for updates from {clubName}!
           </p>
         </div>
@@ -145,7 +145,7 @@ export default function ClubNews({ clubId, clubName }: ClubNewsProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="bg-white/60 backdrop-blur-sm border border-white/30 rounded-2xl p-6 hover:bg-white/80 transition-all duration-300"
+              className="bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm border border-white/30 dark:border-gray-600/30 rounded-2xl p-6 hover:bg-white/80 dark:hover:bg-gray-700/80 transition-all duration-300"
             >
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
@@ -154,8 +154,8 @@ export default function ClubNews({ clubId, clubName }: ClubNewsProps) {
                     <User className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="font-inter font-semibold text-gray-900">{item.author}</p>
-                    <div className="flex items-center text-sm text-gray-500">
+                    <p className="font-inter font-semibold text-gray-900 dark:text-white">{item.author}</p>
+                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                       <Calendar className="w-4 h-4 mr-1" />
                       {formatDate(item.created_at)}
                     </div>
@@ -164,10 +164,10 @@ export default function ClubNews({ clubId, clubName }: ClubNewsProps) {
               </div>
 
               {/* Content */}
-              <h3 className="font-inter text-xl font-bold text-gray-900 mb-3">
+              <h3 className="font-inter text-xl font-bold text-gray-900 dark:text-white mb-3">
                 {item.title}
               </h3>
-              <p className="font-calibri text-gray-700 leading-relaxed mb-4">
+              <p className="font-calibri text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
                 {item.content}
               </p>
 
@@ -178,15 +178,15 @@ export default function ClubNews({ clubId, clubName }: ClubNewsProps) {
                   disabled={likedPosts.has(item.id)}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 ${
                     likedPosts.has(item.id)
-                      ? 'bg-red-100 text-red-600 cursor-not-allowed'
-                      : 'bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600'
+                      ? 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 cursor-not-allowed'
+                      : 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-red-100 dark:hover:bg-red-900/50 hover:text-red-600 dark:hover:text-red-400'
                   }`}
                 >
                   <Heart className={`w-4 h-4 ${likedPosts.has(item.id) ? 'fill-current' : ''}`} />
                   <span className="font-calibri text-sm">{item.likes}</span>
                 </button>
                 
-                <span className="font-calibri text-sm text-gray-500">
+                <span className="font-calibri text-sm text-gray-500 dark:text-gray-400">
                   {clubName}
                 </span>
               </div>

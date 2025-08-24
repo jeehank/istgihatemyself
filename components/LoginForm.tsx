@@ -195,19 +195,6 @@ export default function LoginForm() {
             </motion.button>
           </form>
 
-          {/* Demo Info */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="mt-8 p-4 bg-white/5 rounded-xl border border-white/10"
-          >
-            <p className="font-calibri text-white/80 text-sm text-center">
-              <strong>Demo Credentials:</strong><br />
-              Club: Any club from the dropdown<br />
-              Password: jkeditz
-            </p>
-          </motion.div>
         </motion.div>
       </div>
     </div>

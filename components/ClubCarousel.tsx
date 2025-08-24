@@ -32,7 +32,7 @@ export default function ClubCarousel() {
 
   return (
     <div
-      className="relative h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden -mt-16 md:-mt-20 pt-16 md:pt-20"
+      className="relative h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-black dark:via-gray-900 dark:to-black overflow-hidden -mt-16 md:-mt-20 pt-16 md:pt-20"
       onMouseEnter={() => setIsAutoPlaying(false)}
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
@@ -42,8 +42,36 @@ export default function ClubCarousel() {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 h-full flex items-center justify-center">
-        <div className="text-center text-white px-8 max-w-4xl">
+      <div className="relative z-10 h-full flex items-center justify-center px-4 md:px-8">
+        {/* Previous Club Card - Left Side */}
+        <motion.div
+          className="hidden lg:block absolute left-8 top-1/2 transform -translate-y-1/2 cursor-pointer"
+          onClick={prevSlide}
+          whileHover={{ scale: 1.05, x: 10 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="glass-effect rounded-2xl p-6 w-64 border border-white/20 hover:bg-white/10 transition-all duration-300">
+            <div className="text-center">
+              <p className="font-calibri text-white/60 text-sm mb-3">Previous</p>
+              <div className="mb-3">
+                <img
+                  src="https://www.rollingstone.com/wp-content/uploads/2024/12/madison-beer-interview.jpg?w=1581&h=1054&crop=1"
+                  alt="Club Logo"
+                  className="w-12 h-12 rounded-full mx-auto object-cover border-2 border-white/30"
+                />
+              </div>
+              <h3 className="font-inter text-white text-lg font-semibold mb-2 line-clamp-1">
+                {clubs[(currentIndex - 1 + clubs.length) % clubs.length].name}
+              </h3>
+              <p className="font-calibri text-white/60 text-sm line-clamp-3">
+                {clubs[(currentIndex - 1 + clubs.length) % clubs.length].description}
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Central Content */}
+        <div className="text-center text-white max-w-4xl mx-auto">
           {/* Logo */}
           <motion.div
             initial={{ opacity: 0, y: -50 }}
@@ -59,7 +87,7 @@ export default function ClubCarousel() {
             </p>
           </motion.div>
 
-          {/* Club Display */}
+          {/* Main Club Display */}
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
@@ -74,11 +102,11 @@ export default function ClubCarousel() {
                   {String(currentIndex + 1).padStart(2, '0')} / {String(clubs.length).padStart(2, '0')}
                 </span>
               </div>
-              
+
               <h2 className="font-inter text-4xl md:text-5xl font-bold mb-4">
                 {currentClub.name}
               </h2>
-              
+
               <p className="font-calibri text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
                 {currentClub.description}
               </p>
@@ -92,8 +120,9 @@ export default function ClubCarousel() {
             </motion.div>
           </AnimatePresence>
 
-          {/* Navigation */}
-          <div className="flex items-center justify-center space-x-6">
+          {/* Navigation Controls */}
+          <div className="flex items-center justify-center space-x-8">
+            {/* Previous Button */}
             <button
               onClick={prevSlide}
               className="p-3 rounded-full glass-effect hover:bg-white/20 transition-colors duration-300"
@@ -114,6 +143,7 @@ export default function ClubCarousel() {
               ))}
             </div>
 
+            {/* Next Button */}
             <button
               onClick={nextSlide}
               className="p-3 rounded-full glass-effect hover:bg-white/20 transition-colors duration-300"
@@ -122,6 +152,33 @@ export default function ClubCarousel() {
             </button>
           </div>
         </div>
+
+        {/* Next Club Card - Right Side */}
+        <motion.div
+          className="hidden lg:block absolute right-8 top-1/2 transform -translate-y-1/2 cursor-pointer"
+          onClick={nextSlide}
+          whileHover={{ scale: 1.05, x: -10 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="glass-effect rounded-2xl p-6 w-64 border border-white/20 hover:bg-white/10 transition-all duration-300">
+            <div className="text-center">
+              <p className="font-calibri text-white/60 text-sm mb-3">Coming up</p>
+              <div className="mb-3">
+                <img
+                  src="https://www.rollingstone.com/wp-content/uploads/2024/12/madison-beer-interview.jpg?w=1581&h=1054&crop=1"
+                  alt="Club Logo"
+                  className="w-12 h-12 rounded-full mx-auto object-cover border-2 border-white/30"
+                />
+              </div>
+              <h3 className="font-inter text-white text-lg font-semibold mb-2 line-clamp-1">
+                {clubs[(currentIndex + 1) % clubs.length].name}
+              </h3>
+              <p className="font-calibri text-white/60 text-sm line-clamp-3">
+                {clubs[(currentIndex + 1) % clubs.length].description}
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
       {/* Scroll Indicator */}

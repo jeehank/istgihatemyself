@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Users, IndianRupee, Calendar, Trophy, Star, Crown, UserCheck, FileText } from 'lucide-react'
 import Link from 'next/link'
@@ -7,12 +8,19 @@ import { Club } from '@/data/clubs'
 import ClubNews from './ClubNews'
 import Footer from './Footer'
 import Navbar from './Navbar'
+import UserRegistration from './UserRegistration'
 
 interface ClubDetailProps {
   club: Club
 }
 
 export default function ClubDetail({ club }: ClubDetailProps) {
+  const [showRegistration, setShowRegistration] = useState(false)
+
+  const handleJoinClub = () => {
+    setShowRegistration(true)
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Gradient Background */}
@@ -218,7 +226,10 @@ export default function ClubDetail({ club }: ClubDetailProps) {
                       <IndianRupee className="w-5 h-5 mr-2" />
                       Entry Fee: ₹{club.entryFee}
                     </div>
-                    <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 px-6 rounded-xl font-inter font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+                    <button
+                      onClick={handleJoinClub}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 px-6 rounded-xl font-inter font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+                    >
                       Join Now
                     </button>
                   </div>
@@ -281,6 +292,14 @@ export default function ClubDetail({ club }: ClubDetailProps) {
 
         <Footer />
       </div>
+
+      {/* User Registration Modal */}
+      <UserRegistration
+        isOpen={showRegistration}
+        onClose={() => setShowRegistration(false)}
+        clubId={club.id}
+        clubName={club.name}
+      />
     </div>
   )
 }

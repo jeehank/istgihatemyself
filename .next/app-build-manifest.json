@@ -16,20 +16,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/news/page.js"
     ],
-    "/clubs/[slug]/page": [
+    "/tech-team/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/clubs/[slug]/page.js"
+      "static/chunks/app/tech-team/page.js"
     ],
-    "/admin/login/page": [
+    "/member/login/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/admin/login/page.js"
-    ],
-    "/admin/dashboard/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/dashboard/page.js"
+      "static/chunks/app/member/login/page.js"
     ]
   }
 }
